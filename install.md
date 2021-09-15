@@ -27,3 +27,86 @@ sda
   ├─vg00-lv00    2GB  [SWAP]
   └─vg00-lv01  256GB  /
 ```
+
+---
+## Firewall
+```bash
+#slurm
+linux :~# firewall-cmd --list-all
+linux :~# firewall-cmd --add-port=6817/tcp --add-port=6818/tcp --permanent
+linux :~# firewall-cmd --add-port=60001-65000/tcp --permanent
+linux :~# firewall-cmd --reload
+linux :~# firewall-cmd --list-all
+#nis
+linux :~# firewall-cmd --add-port=1011/upd --permanent
+用yast打開firewall (rpc-bind)
+#ssh
+用yast打開firewall (ssh)
+#nfs
+用yast打開firewall (nfs)
+```
+---
+## ssh setting
+```bash
+#開啟服務
+linux :~# systemctl enable sshd.service
+#免密碼登入設置
+linux :~# ssh-keygen
+linux :~# ssh-copy-id root@<id>
+#登入
+linux :~# ssh <id or name>
+linux :~# logout #(登出)
+#複製
+linux :~# scp <資料位置> <id or name>:<放置位置>
+```
+---
+## munge
+```bash
+#munge install (server, client皆要裝)
+linux :~# zypper munge
+linux :~# systemctl enable munge.service
+linux :~# systemctl start munge.service
+#munge
+linux :~# cd /etc/munge/
+linux :~# md5sum munge.key
+linux :~# scp /etc/munge/munge.key <client_name>:/etc/munge/. #server, client一致
+#munge test
+linux :~# munge -n
+linux :~# munge -n | unmunge
+linux :~# munge -n | ssh <id or name> unmunge
+```
+---
+## slurm install and setting
+```bash
+#install
+linux :~# zypper in slurm
+for server
+linux :~# zypper in slurm-node
+for server
+```
+
+```bash
+#open system
+linux :~# systemctl enable slurmctld.service
+linux :~# systemctl start slurmctld.service (for server)
+linux :~# systemctl enable slurmd.service
+linux :~# systemctl start slurmd.service (for client)
+```
+
+```bash
+#config setting
+linux :~# vi /etc/slurm/slurm.conf
+ClusterName=<自訂統一名稱>
+SlurmctldHost=<server_name>(<server_id>)
+SlurmUser=root
+SlurmdUser=root
+SlurmctldPort=6817
+SlurmPort=6818
+SrunPorRange=60001-65000
+NodeName=<client_name>
+State=idle
+CPUs=<cpu_number>
+PartitionName=normal
+Nodes=<client_name>(ex:c[1-8])
+Default=YES
+```
