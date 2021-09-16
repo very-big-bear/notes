@@ -76,6 +76,33 @@ linux :~# munge -n | unmunge
 linux :~# munge -n | ssh <id or name> unmunge
 ```
 ---
+## chrony
+```bash
+#service
+sle :~# systemctl enable chronyd
+sle :~# systemctl start chronyd
+#config
+sle :~# vi /etc/chrony.conf #server <server_ip>
+sle :~# ls /etc/chrony.d
+#command
+sle :~# chronyc -a makestep
+sle :~# chronyc -a 'burst 4/4'
+```
+---
+## nis
+```bash
+#open passwd, group, hosts, shadow
+#config
+linux :~# vi /etc/ypserv.conf
+#service
+linux :~# systemctl ypserv.servic
+```
+---
+## nfs
+```bash
+#rw, async, no_root_squash
+```
+---
 ## slurm install and setting
 ```bash
 #install
