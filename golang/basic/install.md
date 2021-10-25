@@ -16,7 +16,7 @@ ubuntu:~ # apt install golang
 ```bash
 linux:~ # wget https://golang.org/dl/go1.17.2.linux-amd64.tar.gz
 linux:~ # tar zxf go1.17.2.linux-amd64.tar.gz
-linux:~ # export PATH=/user/local/go/bin:&PATH
+linux:~ # export PATH=/usr/local/go/bin:$PATH
 ```
 
 ---
