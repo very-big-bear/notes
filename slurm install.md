@@ -137,3 +137,51 @@ PartitionName=normal
 Nodes=<client_name>(ex:c[1-8])
 Default=YES
 ```
+
+## QOS
+```bash
+# List cluster
+server :~ # sacctmgr list cluster
+server :~ # sacctmgr list cluster format=Cluster, QOS
+# Add cluster
+server :~ # sacctmgr add cluster linux               #要與slurm.conf 中的ClusterName 相同
+server :~ # sacctmgr list cluster format=Cluster, QOS
+```
+```bash
+# Add Account/User
+server :~ # sacctmgr add account jjcusers cluster=linux
+server :~ # sacctmgr add user name=test1 account=jjcuser cluster=linux
+
+server :~ # sacctmgr list assoc format=Cluster,Account,User,QOS
+  Cluster   Account     User      QOS
+ ```````` ````````` ```````` `````````
+    linux      root             normal
+    linux      root     root    normal
+    linux  jjcusers             normal
+    linux  jjcusers    test1    normal
+    
+```
+
+```bash
+# Add QOS
+server :~ sacctmgr add qos jjcqos1
+server :~ sacctmgr modify qos jjcqos1 set priority=10     #數字越小越慢開始
+server :~ sacctmgr modify qos jjcqos1 set GrpJobs=30      #整個Group的Job數量
+server :~ sacctmgr modify qos jjcqos1 set MaxJobsPU=3     #個人可以算的Job數量
+server :~ sacctmgr show qos format=name,priority,GrpJobs
+    Name      Priorty     GrpJobs     MaxJobsPU
+ ``````` ```````````` ```````````  ````````````
+  normal            0          30               
+     low           10          30             3
+ jjcqos1          100          30             4
+     
+# Modify user's QOS
+server :~ # sacctmgr modify user test1 set qos=jjcqos1
+server :~ # sacctmgr show assoc format=cluster,user,qos
+  Cluster   Account     User      QOS
+ ```````` ````````` ```````` `````````
+    linux      root             normal
+    linux      root     root    normal
+    linux  jjcusers             normal
+    linux  jjcusers    test1   jjcqos1
+```
