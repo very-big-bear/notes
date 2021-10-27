@@ -185,3 +185,168 @@ server :~ # sacctmgr show assoc format=cluster,user,qos
     linux  jjcusers             normal
     linux  jjcusers    test1   jjcqos1
 ```
+## MariaDB
+
+### package
+
+```bash
+controller:~ # zypper in mariadb
+
+# setup mariadb root
+controller:~ # /usr/bin/mysqladmin -u root password <new-password>
+controller:~ # /usr/bin/mysqladmin -u root -h <hostname> password <new-password>
+controller:~ # /usr/bin/mysql_secure_installation
+```
+
+
+### config
+
+```bash
+controller:~ # vi /etc/my.cnf
+# increase pool size
+innodb_buffer_pool_size = 128M
+```
+
+
+### daemon
+
+```bash
+controller:~ # systemctl start mariadb.service
+controller:~ # systemctl enable mariadb.service
+```
+
+
+### check
+
+```bash
+controller:~ # mysql -u root
+-- check pool size
+MariaDB> show variables like 'innodb_buffer_pool_size';
+
+-- check db engine
+MariaDB> show engines;
+
+MariaDB> quit;
+```
+
+### db
+
+```sql
+-- create db
+MariaDB> create database slurm_acct_db;
+MariaDB> show databases;
+MariaDB> drop database slurm_acct_db;
+```
+
+
+### user
+
+```sql
+-- create user
+MariaDB> create user 'slurm'@'localhost' identified by '<password>';
+MariaDB> create user 'slurm'@'controller' identified by '<password>';
+MariaDB> select Host, User, Password from mysql.user;
+MariaDB> drop user 'slurm'@'localhost';
+MariaDB> drop user 'slurm'@'controller';
+
+-- change password
+MariaDB> set PASSWORD FOR 'slurm'@'localhost' = PASSWORD('<password>');
+MariaDB> set PASSWORD FOR 'slurm'@'controller' = PASSWORD('<password>');
+
+
+-- setup grant privilege
+MariaDB> grant all on slurm_acct_db.* TO 'slurm'@'localhost';
+MariaDB> grant all on slurm_acct_db.* TO 'slurm'@'controller';
+MariaDB> show grants for slurm@localhost;
+```
+
+### test
+
+```bash
+controller:~ # mysql -u slurm
+MariaDB> use slurm_acct_db;
+```
+
+
+---
+
+## SlurmDB Daemon
+
+```
+         +-------------------+
+         controller     compute node
+         192.168.0.1    192.168.0.101
+service: munge          munge
+         ypserv         ypbind
+         slurmctld      slurmd
+         mariadb
+         slurmddb
+```
+
+### package
+
+```bash
+controller:~ # zypper in slurm-slurmdbd
+```
+
+
+### slurm config
+
+```bash
+controller:~ # vi /etc/slurm/slurm.conf
+AccountingStorageHost=controller
+AccountingStorageUser=slurm
+AccountingStoragePass=/var/run/munge/munge.socket.2
+AccountingStoragePort=6819
+AccountingStorageType=accounting_storage/slurmdbd
+
+JobAcctGatherType=jobacct_gather/cgroup
+
+JobCompType=jobcomp/none
+```
+
+AccountingStorageType: accounting_storage/none, accounting_storage/filetxt, accounting_storage/slurmdbd
+
+JobAcctGatherType: jobacct_gather/none, jobacct_gather/linux, jobacct_gather/cgroup
+
+JobCompType: jobcomp/none, jobcomp/elasticsearch, jobcomp/filetxt, jobcomp/mysql, jobcomp/script
+
+[slurm.conf](https://slurm.schedmd.com/slurm.conf.html)
+
+
+### slurmdbd config
+
+```bash
+controller:~ # vi /etc/slurm/slurmdbd.conf
+StorageType=accounting_storage/mysql
+
+StorageUser=slurm
+StoragePass=<password>
+StorageLoc=slurm_acct_db
+```
+
+[slurmdbd.conf](https://slurm.schedmd.com/slurmdbd.conf.html)
+
+
+### daemon
+
+```bash
+controller:~ # systemctl restart slurmctld.service
+
+controller:~ # systemctl start slurmdbd.service
+controller:~ # systemctl enable slurmdbd.service
+```
+
+
+### check db
+
+```bash
+controller:~ # mysql -u root
+MariaDB> show databases;
+MariaDB> use slurm_acct_db;
+MariaDB> show tables;
+```
+
+```bash
+controller: # sacct
+```
