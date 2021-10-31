@@ -15,6 +15,7 @@ linux:~ $ go build ./...                # check all import, '...' wildcards
 linux:~ $ go install
 linux:~ $ go get
 linux:~ $ go test
+linux:~ $ go fmt
 ```
 
 
