@@ -47,10 +47,30 @@ package main
 
 import "fmt"
 
-for i := 1; i <= 9; i++{
-        for f := 1; f <= 9; f++{
-        
+func main() {
+        for i := 1; i <= 9; i++{
+                for f := 1; f <= 9; f++{
+                        fmt.Print(i*f, " ")
+                }
+                fmt.Println("")
+        }
+}
 ```
 ## reverse
 ```bash
+package main
+
+import "fmt"
+
+var word, str string
+
+func main() {
+        fmt.Print("input world = ")
+        fmt.Scan(&word)
+        for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+                s[i], s[j] = s[j], s[i]
+                str = string(s)
+        }
+        fmt.Println("answer word =", str)
+}
 ```
