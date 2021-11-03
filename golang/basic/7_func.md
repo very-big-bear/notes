@@ -157,6 +157,25 @@ func main() {
 ## pass function
 
 ```go
+func plus(a int, b int) int {
+	return a + b
+}
+
+func runFunc(a int, b int, f func(int, int) int) int {
+	c := f(a, b)
+	return c
+}
+
+func main() {
+	a := 1
+	b := 2
+	c := runFunc(a, b, plus)
+	fmt.Println(c)
+}
+```
+
+
+```go
 type plusFunc func(int, int) int
 
 func plus(a int, b int) int {
