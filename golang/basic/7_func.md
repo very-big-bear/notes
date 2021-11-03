@@ -127,5 +127,53 @@ func main() {
 }
 ```
 
+---
+
+## recursion
+
+```go
+func fact(n int) int {
+    if n == 0 {
+        return 1
+    }
+    return n * fact(n-1)
+}
+
+func main() {
+    fmt.Println(fact(7))
+
+    var fib func(n int) int
+    fib = func(n int) int {
+        if n < 2 {
+            return n
+        }
+        return fib(n-1) + fib(n-2)
+
+    }
+    fmt.Println(fib(7))
+}
+```
+
+## pass function
+
+```go
+type plusFunc func(int, int) int
+
+func plus(a int, b int) int {
+	return a + b
+}
+
+func runFunc(a int, b int, f plusFunc) int {
+	c := f(a, b)
+	return c
+}
+
+func main() {
+	a := 1
+	b := 2
+	c := runFunc(a, b, plus)
+	fmt.Println(c)
+}
+```
 
 
