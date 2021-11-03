@@ -102,7 +102,30 @@ func main() {
 }
 ```
 
+---
 
+## closure
+
+```go
+func intSeq() func() int {
+    i := 0
+    return func() int {
+        i++
+        return i
+    }
+}
+
+func main() {
+    nextInt := intSeq()
+
+    fmt.Println(nextInt())      // 1      //第一次呼叫已從最外層帶到最內層
+    fmt.Println(nextInt())      // 2      //第二次開始呼叫時，i已經被改變了
+    fmt.Println(nextInt())      // 3
+
+    newInts := intSeq()
+    fmt.Println(newInts())      // 1      //被重新呼叫所以從1開始
+}
+```
 
 
 
