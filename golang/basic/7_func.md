@@ -84,7 +84,7 @@ func main() {
 ## variadic function
 
 ```go
-func sum(nums ...int) {
+func sum(nums ...int) {               //不確定有多少整數以...表示
     fmt.Print(nums, " ")
     total := 0
     for _, num := range nums {
