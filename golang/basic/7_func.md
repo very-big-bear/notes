@@ -36,3 +36,26 @@ fmt.Printf("struct3: %#v\n", p)     // main.point{x:1, y:2}    //(相應值的Go
 fmt.Printf("type: %T\n", p)         // main.point              //(相應值的類型的Go語法表示)
 fmt.Printf("pointer: %p\n", &p)     // 0xc000130010            //memory 位置，(十六進制表示，前綴0x)
 ```
+
+
+---
+
+## function
+
+```go
+func plus(a int, b int) int {
+    return a + b
+}
+
+func plusPlus(a, b, c int) int {
+    return a + b + c
+}
+
+func main() {
+    res := plus(1, 2)
+    fmt.Println("1+2 =", res)       // 3
+
+res = plusPlus(1, 2, 3)
+    fmt.Println("1+2+3 =", res)     // 6
+}
+```
