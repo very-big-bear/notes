@@ -1,0 +1,104 @@
+# Homework2
+
+## Add binary(輸入2進位字串，做2進位字串相加)
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	var number1, number2 string
+	fmt.Print("Binary number1 = ")
+	fmt.Scanln(&number1)                       //輸入數字字串1
+	fmt.Print("Binary number2 = ")
+	fmt.Scanln(&number2) //輸入數字字串22
+	a := number1
+	b := number2
+	s := []rune(a)                             //數字字串1轉為字符
+	t := []rune(b)                             //數字字串2轉為字符
+	if len(s) < len(t) {                       //使數字字串長度保持 前面>=後面
+		s, t = t, s
+	}
+	g := []rune("0")                           //字符g，遇到>=2時做進位，統一使用rune做運算
+	h := []string{}                            //建立slice h, 以方便順序調換
+	i, j := len(s)-1, len(t)-1                 //i, j為相加順序，從最後面的數字相加
+	for i >= 0 && j >= 0 {                     //在相同長度時的計算
+		c := (s[i] - 48 + t[j] - 48 + g[0] - 48) //相加計算
+		d := c % 2                               //餘數為保留值
+		e := c / 2                               //商數為進位值
+		f := fmt.Sprintf("%s", string(e+48))     //將進位值轉成字串
+		g = []rune(f)                            //將進位值字串轉成rune，統一以rune做計算
+		h = append(h, string(d+48))              //將餘數轉成字串，加入slice h內
+		i = i - 1                                //for迴圈到下一位數
+		j = j - 1
+	}
+	for i >= 0 {                               //在其中一個長度較長時的計算
+		c := (s[i] - 48 + g[0] - 48)             //計算過程同上，只是少了字串較少的
+		d := c % 2
+		e := c / 2
+		f := fmt.Sprintf("%s", string(e+48))
+		g = []rune(f)
+		h = append(h, string(d+48))
+		i = i - 1
+	}
+	if g[0] > 0 {                              //最前面的位數加完後需要進位時的方法
+		h = append(h, string(g[0]))
+	}
+	fmt.Print("Answer = ")
+	for m := len(h) - 1; m >= 0; m-- {         //上列計算出來slice h內的值是顛倒的，使用for迴圈print出顛倒後的
+		fmt.Print(h[m])
+	}
+}
+```
+
+```go
+package main
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
+
+func addBinary(a string, b string) string {  //使數字字串長度保持 前面>=後面
+	if len(b) > len(a) {
+		a, b = b, a
+	}
+
+	res := make([]string, len(a)+1)            //初始化長度為len(a)+1的字串
+	i, j, k, c := len(a)-1, len(b)-1, len(a), 0
+	for i >= 0 && j >= 0 {                     //在相同長度時的計算
+		ai, _ := strconv.Atoi(string(a[i]))      //字串1轉數字
+		bj, _ := strconv.Atoi(string(b[j]))      //字串2轉數字
+		res[k] = strconv.Itoa((ai + bj + c) % 2) //印出餘數
+		c = (ai + bj + c) / 2                    //C為商值，要進位
+		i--
+		j--
+		k--
+	}
+	for i >= 0 {                               //在其中一個長度較長時的計算
+		ai, _ := strconv.Atoi(string(a[i]))
+		res[k] = strconv.Itoa((ai + c) % 2)
+		c = (ai + c) / 2
+		i--
+		k--
+	}
+
+	if c > 0 {                                 //最前面的位數加完後需要進位時的方法
+		res[k] = strconv.Itoa(c)
+	}
+
+	return strings.Join(res, "")               //字符串轉換成字串，以""為間隔
+}
+
+func main() {
+	var number1, number2 string
+	fmt.Print("binary number1 = ")
+	fmt.Scanln(&number1)
+	fmt.Print("binary number2 = ")
+	fmt.Scanln(&number2)
+	nextInt := addBinary(number1, number2)
+	fmt.Println("Binary number  = ", nextInt)
+}
+```
