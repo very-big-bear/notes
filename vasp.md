@@ -8,7 +8,7 @@
  
  ```bash
  安裝intel compiler
- 執行sh黨
+ 執行sh檔案
  ```
  
  ```bash
