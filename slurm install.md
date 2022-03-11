@@ -113,7 +113,7 @@ sle :~# chronyc -a makestep
 sle :~# chronyc -a 'burst 4/4'
 ```
 
-#ntp
+##ntp
 ```bash
 #server
 now and on boot
