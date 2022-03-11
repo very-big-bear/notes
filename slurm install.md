@@ -29,21 +29,42 @@ sda
 ```
 
 ---
+## 順序
+```bash
+1. SUSE sle
+2. ssh, munge, nis, nfs, nft or corny, compiler, vasp
+3. slurm
+4. MairaDB, SlurmDB (only server)
+5. QOS (only server)
+
+```
 ## Firewall
 ```bash
 #slurm
 linux :~# firewall-cmd --list-all
 linux :~# firewall-cmd --add-port=6817/tcp --add-port=6818/tcp --permanent
+linux :~# firewall-cmd --add-port=6819/tcp --permanent  #for slurmdb
 linux :~# firewall-cmd --add-port=60001-65000/tcp --permanent
 linux :~# firewall-cmd --reload
 linux :~# firewall-cmd --list-all
 #nis
-linux :~# firewall-cmd --add-port=1011/upd --permanent
-用yast打開firewall (rpc-bind)
+linux :~# firewall-cmd --add-port=1011/tcp --add-port=1011/udp --permanent
 #ssh
 用yast打開firewall (ssh)
 #nfs
-用yast打開firewall (nfs)
+用yast打開firewall (nfs,rpc-bind,mountd)
+linux :~# firewall-cmd --add-port=2049/tcp --add-port=2049/udp--permanent
+linux :~# firewall-cmd --add-port=4000-4004/tcp --add-port=4000-4004/udp--permanent
+linux :~# firewall-cmd --reload
+linux :~# firewall-cmd --list-all
+#ntp
+用yast打開firewall (ntp)
+#未知
+prot=111,3306/1723
+#問題
+nis,nfs等都不通，先關server防火牆，確認是否為防火牆問題
+大多數不通都是防火牆在搞
+一般都是開public，如果要通kvm，要開libvirt
 ```
 ---
 ## ssh setting
@@ -55,9 +76,9 @@ linux :~# ssh-keygen
 linux :~# ssh-copy-id root@<id>
 #登入
 linux :~# ssh <id or name>
-linux :~# logout #(登出)
+linux :~# logout # =ctrl+D (登出)
 #複製
-linux :~# scp <資料位置> <id or name>:<放置位置>
+linux :~# scp <資料位置> <id or name>:<放置位置> #key的位置/root/.ssh/
 ```
 ---
 ## munge
@@ -69,11 +90,14 @@ linux :~# systemctl start munge.service
 #munge
 linux :~# cd /etc/munge/
 linux :~# md5sum munge.key
-linux :~# scp /etc/munge/munge.key <client_name>:/etc/munge/. #server, client一致
+linux :~# scp /etc/munge/munge.key <client_name>:/etc/munge/. #server, client要一致
 #munge test
 linux :~# munge -n
 linux :~# munge -n | unmunge
 linux :~# munge -n | ssh <id or name> unmunge
+#問提
+munged: Error: Keyfile is insecure: /etc/munge/munge.ky should be owned UID 461 insted of UID 0
+解決方法；修改munge.ky 權限 (可能不小心動到，導致權限鎖住)
 ```
 ---
 ## chrony
@@ -88,19 +112,37 @@ sle :~# ls /etc/chrony.d
 sle :~# chronyc -a makestep
 sle :~# chronyc -a 'burst 4/4'
 ```
+
+#ntp
+```bash
+#server
+now and on boot
+Dynamic
+#client
+now and on boot
+Static
+<server or ip>
+```
+
 ---
 ## nis
 ```bash
-#open passwd, group, hosts, shadow
+# open passwd, group, hosts, shadow
+# 255.255.255.0 192.168.1.0
 #config
 linux :~# vi /etc/ypserv.conf
-#service
+# service
 linux :~# systemctl ypserv.servic
+# test
+getent passwd
+getent group
+...
 ```
 ---
 ## nfs
 ```bash
-#rw, async, no_root_squash
+#ex: 192.168.1.0/24 
+#rw, async, no_root_squash, no_subtree_check
 ```
 ---
 ## slurm install and setting
@@ -109,7 +151,7 @@ linux :~# systemctl ypserv.servic
 linux :~# zypper in slurm
 for server
 linux :~# zypper in slurm-node
-for server
+for client
 ```
 
 ```bash
@@ -137,54 +179,12 @@ PartitionName=normal
 Nodes=<client_name>(ex:c[1-8])
 Default=YES
 ```
-
-## QOS
 ```bash
-# List cluster
-server :~ # sacctmgr list cluster
-server :~ # sacctmgr list cluster format=Cluster, QOS
-# Add cluster
-server :~ # sacctmgr add cluster linux               #要與slurm.conf 中的ClusterName 相同
-server :~ # sacctmgr list cluster format=Cluster, QOS
-```
-```bash
-# Add Account/User
-server :~ # sacctmgr add account jjcusers cluster=linux
-server :~ # sacctmgr add user name=test1 account=jjcuser cluster=linux
-
-server :~ # sacctmgr list assoc format=Cluster,Account,User,QOS
-  Cluster   Account     User      QOS
- ```````` ````````` ```````` `````````
-    linux      root             normal
-    linux      root     root    normal
-    linux  jjcusers             normal
-    linux  jjcusers    test1    normal
-    
+# slurm 問題
+/var/log/slurm.ctld.log #log 檔位置
+/var/lib/slurm/clustername #可以改clustername
 ```
 
-```bash
-# Add QOS
-server :~ sacctmgr add qos jjcqos1
-server :~ sacctmgr modify qos jjcqos1 set priority=10     #數字越小越慢開始
-server :~ sacctmgr modify qos jjcqos1 set GrpJobs=30      #整個Group的Job數量
-server :~ sacctmgr modify qos jjcqos1 set MaxJobsPU=3     #個人可以算的Job數量
-server :~ sacctmgr show qos format=name,priority,GrpJobs
-    Name      Priorty     GrpJobs     MaxJobsPU
- ``````` ```````````` ```````````  ````````````
-  normal            0          30               
-     low           10          30             3
- jjcqos1          100          30             4
-     
-# Modify user's QOS
-server :~ # sacctmgr modify user test1 set qos=jjcqos1
-server :~ # sacctmgr show assoc format=cluster,user,qos
-  Cluster   Account     User      QOS
- ```````` ````````` ```````` `````````
-    linux      root             normal
-    linux      root     root    normal
-    linux  jjcusers             normal
-    linux  jjcusers    test1   jjcqos1
-```
 ## MariaDB
 
 ### package
@@ -197,16 +197,12 @@ controller:~ # /usr/bin/mysqladmin -u root password <new-password>
 controller:~ # /usr/bin/mysqladmin -u root -h <hostname> password <new-password>
 controller:~ # /usr/bin/mysql_secure_installation
 ```
-
-
 ### config
-
 ```bash
 controller:~ # vi /etc/my.cnf
 # increase pool size
 innodb_buffer_pool_size = 128M
 ```
-
 
 ### daemon
 
@@ -214,8 +210,6 @@ innodb_buffer_pool_size = 128M
 controller:~ # systemctl start mariadb.service
 controller:~ # systemctl enable mariadb.service
 ```
-
-
 ### check
 
 ```bash
@@ -238,7 +232,6 @@ MariaDB> show databases;
 MariaDB> drop database slurm_acct_db;
 ```
 
-
 ### user
 
 ```sql
@@ -260,10 +253,9 @@ MariaDB> grant all on slurm_acct_db.* TO 'slurm'@'controller';
 MariaDB> show grants for slurm@localhost;
 ```
 
-### test
+### use
 
 ```bash
-controller:~ # mysql -u slurm
 MariaDB> use slurm_acct_db;
 ```
 
@@ -349,4 +341,158 @@ MariaDB> show tables;
 
 ```bash
 controller: # sacct
+```
+## QOS
+```bash
+# List cluster
+server :~ # sacctmgr list cluster
+server :~ # sacctmgr list cluster format=Cluster, QOS
+# Add cluster
+server :~ # sacctmgr add cluster linux               #要與slurm.conf 中的ClusterName 相同
+server :~ # sacctmgr list cluster format=Cluster, QOS
+```
+```bash
+# Add Account/User
+server :~ # sacctmgr add account jjcusers cluster=linux
+server :~ # sacctmgr add user name=test1 account=jjcuser cluster=linux
+
+server :~ # sacctmgr list assoc format=Cluster,Account,User,QOS
+  Cluster   Account     User      QOS
+ ```````` ````````` ```````` `````````
+    linux      root             normal
+    linux      root     root    normal
+    linux  jjcusers             normal
+    linux  jjcusers    test1    normal
+    
+```
+
+```bash
+# Add QOS
+server :~ sacctmgr add qos jjcqos1
+server :~ sacctmgr modify qos jjcqos1 set priority=10     #數字越小越慢開始
+server :~ sacctmgr modify qos jjcqos1 set GrpJobs=30      #整個Group的Job數量
+server :~ sacctmgr modify qos jjcqos1 set MaxJobsPU=3     #個人可以算的Job數量
+server :~ sacctmgr show qos format=name,priority,GrpJobs,MaxJobsPU
+    Name      Priorty     GrpJobs     MaxJobsPU
+ ``````` ```````````` ```````````  ````````````
+  normal            0          30               
+     low           10          30             3
+ jjcqos1          100          30             4
+     
+# Modify user's QOS
+server :~ # sacctmgr modify user test1 set qos=jjcqos1
+server :~ # sacctmgr show assoc format=cluster,user,qos
+  Cluster   Account     User      QOS
+ ```````` ````````` ```````` `````````
+    linux      root             normal
+    linux      root     root    normal
+    linux  jjcusers             normal
+    linux  jjcusers    test1   jjcqos1
+```
+## QoS
+
+### scontrol
+
+```bash
+controller:~ # scontrol show config
+controller:~ # scontrol show config | grep SchedulerType
+controller:~ # scontrol show config | grep PriorityType
+controller:~ # scontrol show config | grep AccountingStorageEnforce
+controller:~ # scontrol show config | grep PriorityWeightQOS
+```
+
+SchedulerType: sched/wiki -> maui, sched/wiki2 -> moab, sched/builtin or sched/backfill -> slurm
+
+PriorityType: priority/basic -> fifo, priority/multifactor -> job priority factor
+
+AccountingStorageEnforce: limits
+
+PriorityWeightQOS: =0 don't use the qos factor, != 0 use the qos factor
+
+
+### sacctmgr
+
+```bash
+controller:~ # sacctmgr list qos [format=Name,Priority,GrpCPUs]
+controller:~ # sacctmgr add qos <qos> [Priority=1000]
+controller:~ # sacctmgr del qos <qos>
+controller:~ # sacctmgr mod qos <qos> set GrpCPUs=-1 Flags=OverPartQOS # -1 is default, unlimited
+controller:~ # sacctmgr mod qos <qos> set GrpJobs=<n>   # job number
+controller:~ # sacctmgr mod qos <qos> set Priority=<n>  # job priority
+
+# associate qos
+controller:~ # sacctmgr mod account <account> set qos=<qos>
+controller:~ # sacctmgr mod user <user> set qos=<qos>
+
+controller:~ # sacctmgr list associations
+```
+
+[Resource Limits](https://slurm.schedmd.com/resource_limits.html)
+
+### sprio
+
+```bash
+controller:~ # sprio
+controller:~ # sprio -l
+```
+
+
+### example
+
+```bash
+# for qos
+controller:~ # sacctmgr list configuration
+controller:~ # sacctmgr list cluster
+controller:~ # sacctmgr list qos format=name,priority,usagefactor
+controller:~ # sacctmgr list qos format=name,maxsubmitjobsperuser,maxjob
+controller:~ # sacctmgr list qos format=name,grpsubmitjob,grpjob
+controller:~ # sacctmgr list account
+controller:~ # sacctmgr list user
+controller:~ # sacctmgr list association format=qos,account,user
+controller:~ # sacctmgr list stats
+
+controller:~ # sacctmgr add qos high_qos   priority=1000 usagefactor=1.0
+controller:~ # sacctmgr add qos medium_qos priority=100  usagefactor=0.8
+controller:~ # sacctmgr add qos low_qos    priority=10   usagefactor=0.5
+
+controller:~ # sacctmgr add account high_acc   cluster=mycluster qos=high_qos
+controller:~ # sacctmgr add account medium_acc cluster=mycluster qos=medium_qos
+controller:~ # sacctmgr add account low_acc    cluster=mycluster qos=low_qos
+
+controller:~ # sacctmgr add user name=high_user   account=high_acc   cluster=mycluster
+controller:~ # sacctmgr add user name=medium_user account=medium_acc cluster=mycluster
+controller:~ # sacctmgr add user name=low_user    account=low_acc    cluster=mycluster
+
+# for job
+controller:~ # squeue
+controller:~ # squeue -l
+
+controller:~ # sinfo
+controller:~ # sinfo -al
+controller:~ # sinfo -Nal
+controller:~ # sinfo -N -o "%.20N %.15C %.10t %.10m %.15P %.15G %.35E"
+
+controller:~ # sprio
+controller:~ # sprio -nl
+controller:~ # sprio -nl
+
+controller:~ # sshare
+controller:~ # sshare -al
+
+controller:~ # sstat -j <job_id>
+
+# config
+controller:~ # scontrol show node
+controller:~ # scontrol show partition
+controller:~ # scontrol show job
+
+# repot
+controller:~ # sreport cluster UserUtilizationByAccount
+controller:~ # sreport user TopUsage
+
+# 管理cluster
+controller:~ # scontrol update nodename=<nodename> State=DRAIN Reason="隨便打"
+controller:~ # scontrol update nodename=<nodename> State=UP
+# 批量砍job
+controller:~ # scancel {jobid-jobid}
 ```
