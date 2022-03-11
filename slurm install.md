@@ -182,7 +182,7 @@ Default=YES
 ```bash
 # slurm 問題
 /var/log/slurm.ctld.log #log 檔位置
-/var/lib/slurm/clustername #可以改clustername
+controller:~ # rm /var/lib/slurm/clustername #可以改clustername
 ```
 
 ## MariaDB
