@@ -1,6 +1,5 @@
 ## 基本說明
-1. 主要紀錄本次架設時進行的設定操作，其餘較詳細的部分可以參考先前筆記
-2. 
+1. 主要紀錄本次架設時進行的設定操作
 
 
 ---
@@ -143,6 +142,11 @@ getent group
 ```bash
 #ex: 192.168.1.0/24 
 #rw, async, no_root_squash, no_subtree_check
+linux :~# vi /etc/sysconfig/nfs
+ LOCKD_TCPPORT=40001
+ LOCKD_UDPPORT=40001
+ MOUNTD_PORT=40002
+ STATD_PORT=40003
 ```
 ---
 ## slurm install and setting
