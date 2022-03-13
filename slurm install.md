@@ -498,5 +498,5 @@ controller:~ # sreport user TopUsage
 controller:~ # scontrol update nodename=<nodename> State=DRAIN Reason="隨便打"
 controller:~ # scontrol update nodename=<nodename> State=UP
 # 批量砍job
-controller:~ # scancel {jobid-jobid}
+controller:~ # scancel {jobid..jobid}
 ```
