@@ -97,6 +97,7 @@ linux :~# munge -n | ssh <id or name> unmunge
 #問提
 munged: Error: Keyfile is insecure: /etc/munge/munge.ky should be owned UID 461 insted of UID 0
 解決方法；修改munge.ky 權限 (可能不小心動到，導致權限鎖住)
+linux :~# chown munge: munge.key
 ```
 ---
 ## chrony
