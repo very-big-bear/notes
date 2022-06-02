@@ -501,3 +501,8 @@ controller:~ # scontrol update nodename=<nodename> State=UP
 # 批量砍job
 controller:~ # scancel {jobid..jobid}
 ```
+### 學長們筆記
+```
+https://github.com/wsunccake/myNote/tree/master/os/linux/sle15
+https://github.com/HongScarlet/homework/blob/master/SUSE15%20cluster/15.%20SLES%2015%20Cluster%20New.md#munge
+```
