@@ -59,12 +59,15 @@ linux :~# firewall-cmd --reload
 linux :~# firewall-cmd --list-all
 #ntp
 用yast打開firewall (ntp)
-#未知
-prot=3306/1723
+#MySQL, MariaDB
+linux :~# firewall-cmd --add-port=3306/tcp --add-port=3306/udp--permanent
+#VPN
+linux :~# firewall-cmd --add-port=1723/tcp --add-port=1723/udp--permanent
+
 #問題
 nis,nfs等都不通，先關server防火牆，確認是否為防火牆問題
 大多數不通都是防火牆在搞
-一般都是開public，如果要通kvm，要開libvirt
+如果要通kvm，在libvirt打開
 ```
 ---
 ## ssh setting
