@@ -28,13 +28,14 @@ sda
 ```
 
 ---
-## 順序
+## 內容
 ```bash
-1. SUSE sle
-2. ssh, munge, nis, nfs, nft or corny, compiler, vasp
-3. slurm
-4. MairaDB, SlurmDB (only server)
-5. QOS (only server)
+1. 安裝 SUSE sle
+2. 設定 ssh, munge, nis, nfs, chrony
+3. 編譯 compiler, vasp
+4. 設定 slurm
+5. 設定 MairaDB, SlurmDB (only server)
+6. 設定 QOS (only server)
 
 ```
 ## Firewall
