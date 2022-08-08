@@ -52,6 +52,7 @@ linux :~# firewall-cmd --add-port=1011/tcp --add-port=1011/udp --permanent
 用yast打開firewall (ssh)
 #nfs
 用yast打開firewall (nfs,rpc-bind,mountd)
+linux :~# firewall-cmd --add-port=111/tcp --add-port=111/udp--permanent
 linux :~# firewall-cmd --add-port=2049/tcp --add-port=2049/udp--permanent
 linux :~# firewall-cmd --add-port=4000-4004/tcp --add-port=4000-4004/udp--permanent
 linux :~# firewall-cmd --reload
@@ -59,7 +60,7 @@ linux :~# firewall-cmd --list-all
 #ntp
 用yast打開firewall (ntp)
 #未知
-prot=111,3306/1723
+prot=3306/1723
 #問題
 nis,nfs等都不通，先關server防火牆，確認是否為防火牆問題
 大多數不通都是防火牆在搞
