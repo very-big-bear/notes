@@ -44,12 +44,13 @@ linux :~# firewall-cmd --list-all
 linux :~# firewall-cmd --add-port=6817/tcp --add-port=6818/tcp --permanent
 linux :~# firewall-cmd --add-port=6819/tcp --permanent  #for slurmdb
 linux :~# firewall-cmd --add-port=60001-65000/tcp --permanent
-linux :~# firewall-cmd --reload
-linux :~# firewall-cmd --list-all
+
 #nis
 linux :~# firewall-cmd --add-port=1011/tcp --add-port=1011/udp --permanent
+
 #ssh
 用yast打開firewall (ssh)
+
 #nfs
 用yast打開firewall (nfs,rpc-bind,mountd)
 linux :~# firewall-cmd --add-port=111/tcp --add-port=111/udp--permanent
@@ -57,12 +58,19 @@ linux :~# firewall-cmd --add-port=2049/tcp --add-port=2049/udp--permanent
 linux :~# firewall-cmd --add-port=4000-4004/tcp --add-port=4000-4004/udp--permanent
 linux :~# firewall-cmd --reload
 linux :~# firewall-cmd --list-all
+
 #ntp
 用yast打開firewall (ntp)
+
 #MySQL, MariaDB
 linux :~# firewall-cmd --add-port=3306/tcp --add-port=3306/udp--permanent
+
 #VPN
 linux :~# firewall-cmd --add-port=1723/tcp --add-port=1723/udp--permanent
+
+#reload, check
+linux :~# firewall-cmd --reload
+linux :~# firewall-cmd --list-all
 
 #問題
 nis,nfs等都不通，先關server防火牆，確認是否為防火牆問題
